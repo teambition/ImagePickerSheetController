@@ -237,7 +237,7 @@ open class ImagePickerSheetController: UIViewController {
         fetchAssets()
         sheetController.hasAssets = !assets.isEmpty
         
-        //reloadMaximumPreviewHeight()
+        reloadMaximumPreviewHeight()
         reloadCurrentPreviewHeight(invalidateLayout: false)
         
         // Filter out the assets that are too thin. This can't be done before because

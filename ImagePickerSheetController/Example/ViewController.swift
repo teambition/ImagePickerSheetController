@@ -30,7 +30,7 @@ class ViewController: UIViewController {
     
     // MARK: - Other Methods
     
-    func presentImagePickerSheet(_ gestureRecognizer: UITapGestureRecognizer) {
+    @objc func presentImagePickerSheet(_ gestureRecognizer: UITapGestureRecognizer) {
         let presentImagePickerController: (UIImagePickerControllerSourceType) -> () = { source in
             let controller = UIImagePickerController()
             controller.delegate = self
@@ -44,8 +44,10 @@ class ViewController: UIViewController {
             self.present(controller, animated: true, completion: nil)
         }
         
-        let controller = ImagePickerSheetController(mediaType: .imageAndVideo)
+        let controller = ImagePickerSheetController(mediaType: .image)
         controller.delegate = self
+        controller.maximumSelection = 9
+        controller.tintColor = UIColor.red
         
         controller.addAction(ImagePickerAction(title: NSLocalizedString("Take Photo Or Video", comment: "Action Title"), secondaryTitle: NSLocalizedString("Add comment", comment: "Action Title"), handler: { _ in
             presentImagePickerController(.camera)

@@ -96,6 +96,8 @@ class SheetCollectionViewCell: UICollectionViewCell {
     
     fileprivate func initialize() {
         layoutMargins = UIEdgeInsets()
+        
+        
     }
     
     // MARK: - Layout
@@ -167,7 +169,7 @@ class SheetCollectionViewCell: UICollectionViewCell {
     // MARK - Background
     
     fileprivate func reloadBackgroundColor() {
-        backgroundColor = isHighlighted ? highlightedBackgroundColor : normalBackgroundColor
+        contentView.backgroundColor = isHighlighted ? highlightedBackgroundColor : normalBackgroundColor
     }
     
 }

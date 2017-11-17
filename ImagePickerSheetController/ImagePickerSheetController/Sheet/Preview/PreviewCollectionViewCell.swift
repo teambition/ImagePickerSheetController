@@ -14,6 +14,7 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = 8
         
         return imageView
     }()
@@ -25,11 +26,26 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         return imageView
     }()
     
+    let hightLightView: UIView = {
+        let view = UIView()
+        view.layer.masksToBounds = true
+        view.layer.cornerRadius = 8
+        view.alpha = 0.7
+        view.isHidden = true
+        return view
+    }()
+    
     fileprivate class var videoImage: UIImage? {
         let bundle = Bundle(for: ImagePickerSheetController.self)
         let image = UIImage(named: "PreviewCollectionViewCell-video", in: bundle, compatibleWith: nil)
         
         return image
+    }
+    
+    override var isHighlighted: Bool {
+        didSet {
+            hightLightView.isHidden = !isHighlighted
+        }
     }
     
     // MARK: - Initialization
@@ -49,6 +65,13 @@ class PreviewCollectionViewCell: UICollectionViewCell {
     fileprivate func initialize() {
         addSubview(imageView)
         addSubview(videoIndicatorView)
+        
+        addSubview(hightLightView)
+        hightLightView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint(item: hightLightView, attribute: .top, relatedBy: .equal, toItem: self, attribute: .top, multiplier: 1.0, constant: 0).isActive = true
+        NSLayoutConstraint(item: hightLightView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 0).isActive = true
+        NSLayoutConstraint(item: hightLightView, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1.0, constant: 0).isActive = true
+        NSLayoutConstraint(item: hightLightView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1.0, constant: 0).isActive = true
     }
     
     // MARK: - Other Methods
@@ -58,6 +81,7 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         
         imageView.image = nil
         videoIndicatorView.isHidden = true
+        hightLightView.isHidden = true
     }
     
     // MARK: - Layout
@@ -71,5 +95,7 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         let inset: CGFloat = 4
         let videoIndicatorViewOrigin = CGPoint(x: bounds.minX + inset, y: bounds.maxY - inset - videoIndicatViewSize.height)
         videoIndicatorView.frame = CGRect(origin: videoIndicatorViewOrigin, size: videoIndicatViewSize)
+        
+        hightLightView.backgroundColor = tintColor
     }
 }

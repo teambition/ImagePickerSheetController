@@ -33,14 +33,14 @@ class PreviewSupplementaryView: UICollectionReusableView {
         let bundle = Bundle(for: ImagePickerSheetController.self)
         let image = UIImage(named: "PreviewSupplementaryView-Checkmark", in: bundle, compatibleWith: nil)
         
-        return image?.withRenderingMode(.alwaysTemplate)
+        return image
     }
     
     class var selectedCheckmarkImage: UIImage? {
         let bundle = Bundle(for: ImagePickerSheetController.self)
         let image = UIImage(named: "PreviewSupplementaryView-Checkmark-Selected", in: bundle, compatibleWith: nil)
         
-        return image?.withRenderingMode(.alwaysTemplate)
+        return image
     }
     
     // MARK: - Initialization
@@ -76,7 +76,7 @@ class PreviewSupplementaryView: UICollectionReusableView {
     }
     
     fileprivate func reloadButtonBackgroundColor() {
-        button.backgroundColor = (selected) ? tintColor : nil
+        button.tintColor = (selected) ? tintColor : nil
     }
     
     // MARK: - Layout
@@ -85,7 +85,7 @@ class PreviewSupplementaryView: UICollectionReusableView {
         super.layoutSubviews()
         
         button.sizeToFit()
-        button.frame.origin = CGPoint(x: buttonInset.left, y: bounds.height-button.frame.height-buttonInset.bottom)
+        button.frame.origin = CGPoint(x: buttonInset.left, y: buttonInset.bottom)
         button.layer.cornerRadius = button.frame.height / 2.0
     }
     

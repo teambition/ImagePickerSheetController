@@ -9,6 +9,7 @@
 import UIKit
 
 let sheetInset: CGFloat = 10
+let fixPreviewCellHeigh: CGFloat = 160
 
 class SheetController: NSObject {
     
@@ -39,6 +40,8 @@ class SheetController: NSObject {
         return allIndexPaths().map { self.sizeForSheetItemAtIndexPath($0).height }
             .reduce(0, +)
     }
+    
+    var hasAssets: Bool = false
     
     // MARK: - Initialization
     
@@ -74,11 +77,10 @@ class SheetController: NSObject {
     fileprivate func sizeForSheetItemAtIndexPath(_ indexPath: IndexPath) -> CGSize {
         let height: CGFloat = {
             if indexPath.section == 0 {
-                return previewHeight
+                return hasAssets ? fixPreviewCellHeigh : 0
             }
             
             let actionItemHeight: CGFloat = 57
-            
             let insets = attributesForItemAtIndexPath(indexPath).backgroundInsets
             return actionItemHeight + insets.top + insets.bottom
         }()
@@ -116,6 +118,9 @@ class SheetController: NSObject {
             return (.bottom(cornerRadius), UIEdgeInsets(top: 0, left: sheetInset, bottom: sheetInset, right: sheetInset))
         }
         
+        if indexPath.section == 1 && indexPath.row == 0 && !hasAssets {
+            return (.top(cornerRadius), UIEdgeInsets(top: 0, left: sheetInset, bottom: 0, right: sheetInset))
+        }
         return (.none, UIEdgeInsets(top: 0, left: sheetInset, bottom: 0, right: sheetInset))
     }
     
@@ -157,7 +162,7 @@ class SheetController: NSObject {
         action.handle(numberOfSelectedAssets)
     }
     
-    func handleCancelAction() {
+    @objc func handleCancelAction() {
         let cancelAction = actions.filter { $0.style == .cancel }
                                   .first
         
@@ -172,7 +177,7 @@ class SheetController: NSObject {
     // MARK: - 
     
     func setPreviewHeight(_ height: CGFloat, invalidateLayout: Bool) {
-        previewHeight = height
+        previewHeight = fixPreviewCellHeigh
         if invalidateLayout {
             sheetCollectionView.collectionViewLayout.invalidateLayout()
         }
@@ -204,11 +209,12 @@ extension SheetController: UICollectionViewDataSource {
             let actionCell = collectionView.dequeueReusableCell(withReuseIdentifier: NSStringFromClass(SheetActionCollectionViewCell.self), for: indexPath) as! SheetActionCollectionViewCell
             actionCell.textLabel.font = fontForAction(action)
             actionCell.textLabel.text = numberOfSelectedAssets > 0 ? action.secondaryTitle(numberOfSelectedAssets) : action.title
+            actionCell.textLabel.textColor =  sheetCollectionView.tintColor
             
             cell = actionCell
         }
         
-        cell.separatorVisible = (indexPath.section == 1)
+        cell.separatorVisible = true
         
         // iOS specific design
         (cell.roundedCorners, cell.backgroundInsets) = attributesForItemAtIndexPath(indexPath)

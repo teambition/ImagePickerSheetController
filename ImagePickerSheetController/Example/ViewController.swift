@@ -48,6 +48,9 @@ class ViewController: UIViewController {
         controller.delegate = self
         controller.maximumSelection = 9
         controller.tintColor = UIColor.red
+        controller.selectTooManyHandlingCallback = {
+            print("excute selectTooManyHandlingCallback")
+        }
         
         controller.addAction(ImagePickerAction(title: NSLocalizedString("Photo Library", comment: "Action Title"), secondaryTitle: { NSString.localizedStringWithFormat(NSLocalizedString("ImagePickerSheet.button1.Send %lu Photo", comment: "Action Title") as NSString, $0) as String}, handler: { _ in
             presentImagePickerController(.photoLibrary)
@@ -110,5 +113,4 @@ extension ViewController: ImagePickerSheetControllerDelegate {
     func controller(_ controller: ImagePickerSheetController, didDeselectAsset asset: PHAsset) {
         print("Did deselect an asset")
     }
-    
 }

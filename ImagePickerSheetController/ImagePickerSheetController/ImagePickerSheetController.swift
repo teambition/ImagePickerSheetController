@@ -29,7 +29,6 @@ public enum ImagePickerMediaType {
     
     @objc optional func controller(_ controller: ImagePickerSheetController, willDeselectAsset asset: PHAsset)
     @objc optional func controller(_ controller: ImagePickerSheetController, didDeselectAsset asset: PHAsset)
-    
 }
 
 @available(iOS 9.0, *)
@@ -132,6 +131,8 @@ open class ImagePickerSheetController: UIViewController {
     fileprivate var previewCheckmarkInset: CGFloat {
         return previewInset
     }
+    
+    open var selectTooManyHandlingCallback: (() -> ())?
     
     // MARK: - Initialization
     
@@ -449,16 +450,8 @@ extension ImagePickerSheetController: UICollectionViewDelegate {
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if let maximumSelection = maximumSelection, selectedAssetIndices.count >= maximumSelection {
-            if let previousItemIndex = selectedAssetIndices.first {
-                guard let deselectedAsset = selectedAssets.first else { return }
-
-                delegate?.controller?(self, willDeselectAsset: deselectedAsset)
-
-                supplementaryViews[previousItemIndex]?.selected = false
-                selectedAssetIndices.removeFirst()
-
-                delegate?.controller?(self, didDeselectAsset: deselectedAsset)
-            }
+            selectTooManyHandlingCallback?()
+            return
         }
         
         let selectedAsset = assets[indexPath.section]

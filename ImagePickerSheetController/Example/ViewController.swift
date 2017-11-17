@@ -49,16 +49,20 @@ class ViewController: UIViewController {
         controller.maximumSelection = 9
         controller.tintColor = UIColor.red
         
-        controller.addAction(ImagePickerAction(title: NSLocalizedString("Take Photo Or Video", comment: "Action Title"), secondaryTitle: NSLocalizedString("Add comment", comment: "Action Title"), handler: { _ in
-            presentImagePickerController(.camera)
-        }, secondaryHandler: { _, numberOfPhotos in
-            print("Comment \(numberOfPhotos) photos")
-        }))
         controller.addAction(ImagePickerAction(title: NSLocalizedString("Photo Library", comment: "Action Title"), secondaryTitle: { NSString.localizedStringWithFormat(NSLocalizedString("ImagePickerSheet.button1.Send %lu Photo", comment: "Action Title") as NSString, $0) as String}, handler: { _ in
             presentImagePickerController(.photoLibrary)
         }, secondaryHandler: { _, numberOfPhotos in
             print("Send \(controller.selectedAssets)")
         }))
+        
+        controller.addAction(ImagePickerAction(title: NSLocalizedString("Take Photo Or Video", comment: "Action Title"), secondaryTitle: NSLocalizedString("Add comment", comment: "Action Title"), style: .notDismiss,handler: { [weak self] _ in
+            print("Take Photo Or Video")
+            self?.dismiss(animated: true, completion: nil)
+        }, secondaryHandler: { _, numberOfPhotos in
+            print("Comment \(numberOfPhotos) photos")
+            controller.cancellAllSelected()
+        }))
+        
         controller.addAction(ImagePickerAction(cancelTitle: NSLocalizedString("Cancel", comment: "Action Title")))
         
         if UIDevice.current.userInterfaceIdiom == .pad {

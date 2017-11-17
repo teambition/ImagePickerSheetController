@@ -33,6 +33,8 @@ class SheetController: NSObject {
     
     var actionHandlingCallback: (() -> ())?
     
+    var unSelectAllActionHandlingCallback: (() -> ())?
+    
     fileprivate(set) var previewHeight: CGFloat = 0
     var numberOfSelectedAssets = 0
     
@@ -158,7 +160,9 @@ class SheetController: NSObject {
     }
     
     fileprivate func handleAction(_ action: ImagePickerAction) {
-        actionHandlingCallback?()
+        if action.style != .notDismiss {
+            actionHandlingCallback?()
+        }
         action.handle(numberOfSelectedAssets)
     }
     

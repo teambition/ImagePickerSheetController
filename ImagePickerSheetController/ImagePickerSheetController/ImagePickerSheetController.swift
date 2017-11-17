@@ -114,7 +114,7 @@ open class ImagePickerSheetController: UIViewController {
     
     fileprivate lazy var requestOptions: PHImageRequestOptions = {
         let options = PHImageRequestOptions()
-        options.deliveryMode = .fastFormat
+        options.deliveryMode = .highQualityFormat
         options.resizeMode = .fast
         
         return options
@@ -215,6 +215,12 @@ open class ImagePickerSheetController: UIViewController {
         view.setNeedsLayout()
     }
     
+    open func cancellAllSelected() {
+        selectedAssetIndices = []
+        previewCollectionView.reloadData()
+        sheetController.reloadActionItems()
+    }
+    
     // MARK: - Images
     
     fileprivate func sizeForAsset(_ asset: PHAsset, scale: CGFloat = 1) -> CGSize {
@@ -230,7 +236,7 @@ open class ImagePickerSheetController: UIViewController {
         fetchAssets()
         sheetController.hasAssets = !assets.isEmpty
         
-        reloadMaximumPreviewHeight()
+        //reloadMaximumPreviewHeight()
         reloadCurrentPreviewHeight(invalidateLayout: false)
         
         // Filter out the assets that are too thin. This can't be done before because
@@ -281,7 +287,7 @@ open class ImagePickerSheetController: UIViewController {
     
     fileprivate func requestImageForAsset(_ asset: PHAsset, completion: @escaping (_ image: UIImage?) -> ()) {
         let targetSize = sizeForAsset(asset, scale: UIScreen.main.scale)
-        requestOptions.isSynchronous = true
+        requestOptions.isSynchronous = false
         
         // Workaround because PHImageManager.requestImageForAsset doesn't work for burst images
         if asset.representsBurst {
@@ -462,13 +468,13 @@ extension ImagePickerSheetController: UICollectionViewDelegate {
         selectedAssetIndices = selectedAssetIndices.filter { $0 != indexPath.section }
         selectedAssetIndices.append(indexPath.section)
         
-        if !enlargedPreviews {
-            enlargePreviewsByCenteringToIndexPath(indexPath) {
-                self.sheetController.reloadActionItems()
-                self.previewCollectionView.imagePreviewLayout.showsSupplementaryViews = true
-            }
-        }
-        else {
+//        if !enlargedPreviews {
+//            enlargePreviewsByCenteringToIndexPath(indexPath) {
+//                self.sheetController.reloadActionItems()
+//                self.previewCollectionView.imagePreviewLayout.showsSupplementaryViews = true
+//            }
+//        }
+//        else {
             // scrollToItemAtIndexPath doesn't work reliably
             if let cell = collectionView.cellForItem(at: indexPath) {
                 var contentOffset = CGPoint(x: cell.frame.midX - collectionView.frame.width / 2.0, y: 0.0)
@@ -479,7 +485,7 @@ extension ImagePickerSheetController: UICollectionViewDelegate {
             }
             
             sheetController.reloadActionItems()
-        }
+        //}
         
         supplementaryViews[indexPath.section]?.selected = true
         

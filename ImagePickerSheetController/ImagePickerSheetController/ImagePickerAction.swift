@@ -11,6 +11,7 @@ import Foundation
 public enum ImagePickerActionStyle {
     case `default`
     case cancel
+    case notDismiss // 不主动 dismiss 图片选择器
 }
 
 open class ImagePickerAction {

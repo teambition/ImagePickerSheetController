@@ -74,7 +74,7 @@ open class ImagePickerSheetController: UIViewController {
         let view = UIView()
         view.accessibilityIdentifier = "ImagePickerSheetBackground"
         if UIDevice.current.userInterfaceIdiom == .pad {
-            view.backgroundColor = UIColor.clear
+            view.backgroundColor = UIColor(white: 0.8, alpha: 0.1)
         } else {
             view.backgroundColor = UIColor(white: 0.0, alpha: 0.3961)
 

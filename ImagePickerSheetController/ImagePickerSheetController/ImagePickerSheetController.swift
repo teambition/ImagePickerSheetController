@@ -73,7 +73,12 @@ open class ImagePickerSheetController: UIViewController {
     lazy var backgroundView: UIView = {
         let view = UIView()
         view.accessibilityIdentifier = "ImagePickerSheetBackground"
-        view.backgroundColor = UIColor(white: 0.0, alpha: 0.3961)
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            view.backgroundColor = UIColor.clear
+        } else {
+            view.backgroundColor = UIColor(white: 0.0, alpha: 0.3961)
+
+        }
         view.addGestureRecognizer(UITapGestureRecognizer(target: self.sheetController, action: #selector(SheetController.handleCancelAction)))
         
         return view

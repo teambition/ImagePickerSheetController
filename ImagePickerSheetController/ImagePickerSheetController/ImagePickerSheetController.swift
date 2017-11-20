@@ -237,16 +237,16 @@ open class ImagePickerSheetController: UIViewController {
         fetchAssets()
         sheetController.hasAssets = !assets.isEmpty
         
-        reloadMaximumPreviewHeight()
+        //reloadMaximumPreviewHeight()
         reloadCurrentPreviewHeight(invalidateLayout: false)
         
         // Filter out the assets that are too thin. This can't be done before because
         // we don't know how tall the images should be
-        let minImageWidth = 2 * previewCheckmarkInset + (PreviewSupplementaryView.checkmarkImage?.size.width ?? 0)
-        assets = assets.filter { asset in
-            let size = sizeForAsset(asset)
-            return size.width >= minImageWidth
-        }
+//        let minImageWidth = 2 * previewCheckmarkInset + (PreviewSupplementaryView.checkmarkImage?.size.width ?? 0)
+//        assets = assets.filter { asset in
+//            let size = sizeForAsset(asset)
+//            return size.width >= minImageWidth
+//        }
         
     }
     
@@ -328,7 +328,7 @@ open class ImagePickerSheetController: UIViewController {
             backgroundView.frame = view.bounds
         }
         
-        reloadMaximumPreviewHeight()
+        //reloadMaximumPreviewHeight()
         reloadCurrentPreviewHeight(invalidateLayout: true)
         
         let sheetHeight = sheetController.preferredSheetHeight
@@ -337,7 +337,11 @@ open class ImagePickerSheetController: UIViewController {
         // This particular order is necessary so that the sheet is layed out
         // correctly with and without an enclosing popover
         preferredContentSize = sheetSize
-        sheetCollectionView.frame = CGRect(origin: CGPoint(x: view.bounds.minX, y: view.bounds.maxY - view.frame.origin.y - sheetHeight), size: sheetSize)
+        var yPosition = view.bounds.maxY - view.frame.origin.y - sheetHeight
+        if #available(iOS 11.0, *) {
+            yPosition = view.bounds.maxY - view.frame.origin.y - sheetHeight - view.safeAreaInsets.bottom
+        }
+        sheetCollectionView.frame = CGRect(origin: CGPoint(x: view.bounds.minX, y: yPosition), size: sheetSize)
     }
     
     fileprivate func reloadCurrentPreviewHeight(invalidateLayout invalidate: Bool) {

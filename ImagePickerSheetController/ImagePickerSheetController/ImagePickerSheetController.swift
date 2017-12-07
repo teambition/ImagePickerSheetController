@@ -124,7 +124,7 @@ open class ImagePickerSheetController: UIViewController {
         return options
     }()
     
-    fileprivate let imageManager = PHCachingImageManager()
+    fileprivate lazy var imageManager = PHCachingImageManager()
     
     /// Whether the image preview has been elarged. This is the case when at least once
     /// image has been selected.

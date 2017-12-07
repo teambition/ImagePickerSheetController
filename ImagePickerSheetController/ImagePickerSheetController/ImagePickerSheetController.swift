@@ -120,7 +120,6 @@ open class ImagePickerSheetController: UIViewController {
         let options = PHImageRequestOptions()
         options.deliveryMode = .highQualityFormat
         options.resizeMode = .fast
-        
         return options
     }()
     
@@ -258,6 +257,7 @@ open class ImagePickerSheetController: UIViewController {
     fileprivate func fetchAssets() {
         let options = PHFetchOptions()
         options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        options.includeAssetSourceTypes = [.typeUserLibrary, .typeCloudShared, .typeiTunesSynced]
         
         switch mediaType {
         case .image:
@@ -273,8 +273,7 @@ open class ImagePickerSheetController: UIViewController {
         
         let result = PHAsset.fetchAssets(with: options)
         let requestOptions = PHImageRequestOptions()
-        requestOptions.isSynchronous = true
-        requestOptions.deliveryMode = .fastFormat
+        requestOptions.isNetworkAccessAllowed = true
         
         result.enumerateObjects(options: [], using: { asset, index, stop in
             defer {
@@ -282,29 +281,23 @@ open class ImagePickerSheetController: UIViewController {
                     stop.initialize(to: true)
                 }
             }
-            
-            self.imageManager.requestImageData(for: asset, options: requestOptions) { data, _, _, info in
-                if data != nil {
-                    self.assets.append(asset)
-                }
-            }
+            self.assets.append(asset)
         })
     }
     
-    fileprivate func requestImageForAsset(_ asset: PHAsset, completion: @escaping (_ image: UIImage?) -> ()) {
+    fileprivate func requestImageForAsset(_ asset: PHAsset, completion: @escaping (_ image: UIImage?, _ asset: PHAsset) -> ()) {
         let targetSize = sizeForAsset(asset, scale: UIScreen.main.scale)
-        requestOptions.isSynchronous = false
-        
+        requestOptions.isNetworkAccessAllowed = true
         // Workaround because PHImageManager.requestImageForAsset doesn't work for burst images
         if asset.representsBurst {
             imageManager.requestImageData(for: asset, options: requestOptions) { data, _, _, _ in
                 let image = data.flatMap { UIImage(data: $0) }
-                completion(image)
+                completion(image, asset)
             }
         }
         else {
             imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFill, options: requestOptions) { image, _ in
-                completion(image)
+                completion(image, asset)
             }
         }
     }
@@ -428,8 +421,17 @@ extension ImagePickerSheetController: UICollectionViewDataSource {
         let asset = assets[indexPath.section]
         cell.videoIndicatorView.isHidden = asset.mediaType != .video
 
-        requestImageForAsset(asset) { image in
-            cell.imageView.image = image
+        cell.isUserInteractionEnabled = false
+        cell.imageView.image = nil
+        cell.iCloudIndicatorView.isHidden = false
+        cell.localIdetifier = asset.localIdentifier
+        
+        requestImageForAsset(asset) { (image, imageAsset) in
+            if let image = image, imageAsset.localIdentifier == cell.localIdetifier {
+                cell.isUserInteractionEnabled = true
+                cell.iCloudIndicatorView.isHidden = true
+                cell.imageView.image = image
+            }
         }
         
         cell.isSelected = selectedAssetIndices.contains(indexPath.section)
@@ -461,6 +463,10 @@ extension ImagePickerSheetController: UICollectionViewDelegate {
         if let maximumSelection = maximumSelection, selectedAssetIndices.count >= maximumSelection {
             selectTooManyHandlingCallback?()
             return
+        }
+        
+        guard let cell = collectionView.cellForItem(at: indexPath) as? PreviewCollectionViewCell, cell.imageView.image != nil  else {
+           return
         }
         
         let selectedAsset = assets[indexPath.section]

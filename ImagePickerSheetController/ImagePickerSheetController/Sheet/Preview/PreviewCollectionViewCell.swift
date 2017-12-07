@@ -15,6 +15,7 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 8
+        imageView.backgroundColor = UIColor.lightText
         
         return imageView
     }()
@@ -23,6 +24,13 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         let imageView = UIImageView(image: videoImage)
         imageView.isHidden = true
         
+        return imageView
+    }()
+    
+    let iCloudIndicatorView: UIImageView = {
+        let imageView = UIImageView(image: iCloudImage)
+        imageView.isHidden = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
@@ -35,9 +43,18 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         return view
     }()
     
+    var localIdetifier: String?
+    
     fileprivate class var videoImage: UIImage? {
         let bundle = Bundle(for: ImagePickerSheetController.self)
         let image = UIImage(named: "PreviewCollectionViewCell-video", in: bundle, compatibleWith: nil)
+        
+        return image
+    }
+    
+    fileprivate class var iCloudImage: UIImage? {
+        let bundle = Bundle(for: ImagePickerSheetController.self)
+        let image = UIImage(named: "iCloud", in: bundle, compatibleWith: nil)
         
         return image
     }
@@ -72,6 +89,12 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         NSLayoutConstraint(item: hightLightView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: 0).isActive = true
         NSLayoutConstraint(item: hightLightView, attribute: .left, relatedBy: .equal, toItem: self, attribute: .left, multiplier: 1.0, constant: 0).isActive = true
         NSLayoutConstraint(item: hightLightView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1.0, constant: 0).isActive = true
+        
+        addSubview(iCloudIndicatorView)
+        NSLayoutConstraint(item: iCloudIndicatorView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0, constant: 24).isActive = true
+        NSLayoutConstraint(item: iCloudIndicatorView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0, constant: 24).isActive = true
+        NSLayoutConstraint(item: iCloudIndicatorView, attribute: .bottom, relatedBy: .equal, toItem: self, attribute: .bottom, multiplier: 1.0, constant: -15).isActive = true
+        NSLayoutConstraint(item: iCloudIndicatorView, attribute: .right, relatedBy: .equal, toItem: self, attribute: .right, multiplier: 1.0, constant: -15).isActive = true
     }
     
     // MARK: - Other Methods
@@ -81,7 +104,10 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         
         imageView.image = nil
         videoIndicatorView.isHidden = true
+        iCloudIndicatorView.isHidden = true
         hightLightView.isHidden = true
+        
+        isUserInteractionEnabled = false
     }
     
     // MARK: - Layout

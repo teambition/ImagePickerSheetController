@@ -55,7 +55,10 @@ class ViewController: UIViewController {
         controller.addAction(ImagePickerAction(title: NSLocalizedString("Photo Library", comment: "Action Title"), secondaryTitle: { NSString.localizedStringWithFormat(NSLocalizedString("ImagePickerSheet.button1.Send %lu Photo", comment: "Action Title") as NSString, $0) as String}, handler: { _ in
             presentImagePickerController(.photoLibrary)
         }, secondaryHandler: { _, numberOfPhotos in
-            print("Send \(controller.selectedAssets)")
+            //print("Send \(controller.selectedAssets)")
+            //print("Send image size: \(controller.selectedImages)")
+            
+            self.processSelectedAssets(controller.selectedAssets)
         }))
         
         controller.addAction(ImagePickerAction(title: NSLocalizedString("Take Photo Or Video", comment: "Action Title"), secondaryTitle: NSLocalizedString("Add comment", comment: "Action Title"), style: .notDismiss,handler: { [weak self] _ in
@@ -75,6 +78,26 @@ class ViewController: UIViewController {
         }
         
         present(controller, animated: true, completion: nil)
+    }
+    
+    func processSelectedAssets(_ selectedAssets: [PHAsset]) {
+        let options = PHImageRequestOptions()
+        options.isSynchronous = true
+        options.isNetworkAccessAllowed = true
+        
+        for asset in selectedAssets {
+            PHImageManager.default().requestImageData(for: asset, options: options, resultHandler: { (imageData, _, _, info) in
+                guard let imageData = imageData else {
+                    print("has no process image ")
+                    return
+                }
+                if let thumbnailImage = UIImage(data: imageData), let thumbnailData = UIImageJPEGRepresentation(thumbnailImage, 0.5) {
+                    print("process image : \(thumbnailImage) data: \(thumbnailData)")
+                } else {
+                    print("convert to process image failed")
+                }
+            })
+        }
     }
     
 }

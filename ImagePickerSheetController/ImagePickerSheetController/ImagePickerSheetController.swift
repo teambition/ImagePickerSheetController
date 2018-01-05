@@ -36,11 +36,11 @@ open class ImagePickerSheetController: UIViewController {
     
     fileprivate lazy var sheetController: SheetController = {
         let controller = SheetController(previewCollectionView: self.previewCollectionView)
-        controller.actionHandlingCallback = { [weak self] in
+        controller.actionHandlingCallback = { [weak self, weak controller] in
             self?.dismiss(animated: true, completion: {
                 // Possible retain cycle when action handlers hold a reference to the IPSC
                 // Remove all actions to break it
-                controller.removeAllActions()
+                controller?.removeAllActions()
             })
         }
         
@@ -110,6 +110,9 @@ open class ImagePickerSheetController: UIViewController {
     open var selectedAssets: [PHAsset] {
         return selectedAssetIndices.map { self.assets[$0] }
     }
+    
+    /// The selected images
+    open var selectedImages: [UIImage]  = []
     
     /// The media type of the displayed assets
     open let mediaType: ImagePickerMediaType
@@ -222,6 +225,8 @@ open class ImagePickerSheetController: UIViewController {
     
     open func cancellAllSelected() {
         selectedAssetIndices = []
+        selectedImages = []
+        
         previewCollectionView.reloadData()
         sheetController.reloadActionItems()
     }
@@ -285,19 +290,38 @@ open class ImagePickerSheetController: UIViewController {
         })
     }
     
-    fileprivate func requestImageForAsset(_ asset: PHAsset, completion: @escaping (_ image: UIImage?, _ asset: PHAsset) -> ()) {
+    fileprivate func requestImageForAsset(_ asset: PHAsset, completion: @escaping (_ image: UIImage?, _ asset: PHAsset, _ isIcloudImage: Bool) -> ()) {
         let targetSize = sizeForAsset(asset, scale: UIScreen.main.scale)
         requestOptions.isNetworkAccessAllowed = true
+        
         // Workaround because PHImageManager.requestImageForAsset doesn't work for burst images
         if asset.representsBurst {
-            imageManager.requestImageData(for: asset, options: requestOptions) { data, _, _, _ in
+            imageManager.requestImageData(for: asset, options: requestOptions) { data, _, _, info in
                 let image = data.flatMap { UIImage(data: $0) }
-                completion(image, asset)
+                completion(image, asset, false)
             }
-        }
-        else {
-            imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFill, options: requestOptions) { image, _ in
-                completion(image, asset)
+        } else {
+            let options = PHImageRequestOptions()
+            options.deliveryMode = .highQualityFormat
+            options.isNetworkAccessAllowed = true
+            imageManager.requestImage(for: asset, targetSize: targetSize, contentMode: .aspectFill, options: options) { image, info in
+                var isIcloudImage = true
+                if let imageInfo = info, let isDegraded = imageInfo["PHImageResultIsDegradedKey"] as? Bool {
+                    isIcloudImage = isDegraded
+                }
+                if image != nil {
+                    completion(image, asset, isIcloudImage)
+                }
+            }
+            
+            //提前加载高质量的原图，解决发送卡顿的问题
+            options.resizeMode = .fast
+            imageManager.requestImage(for: asset, targetSize: PHImageManagerMaximumSize, contentMode: .aspectFill, options: options) { image, info in
+                if image != nil {
+                    completion(nil, asset, false)
+                } else {
+                    print("image is nil")
+                }
             }
         }
     }
@@ -426,10 +450,13 @@ extension ImagePickerSheetController: UICollectionViewDataSource {
         cell.iCloudIndicatorView.isHidden = false
         cell.localIdetifier = asset.localIdentifier
         
-        requestImageForAsset(asset) { (image, imageAsset) in
-            if let image = image, imageAsset.localIdentifier == cell.localIdetifier {
-                cell.isUserInteractionEnabled = true
-                cell.iCloudIndicatorView.isHidden = true
+        requestImageForAsset(asset) { [weak cell] (image, imageAsset, isIcloudImage) in
+            guard let cell = cell, imageAsset.localIdentifier == cell.localIdetifier else {
+                return
+            }
+            cell.iCloudIndicatorView.isHidden = !isIcloudImage
+            cell.isUserInteractionEnabled = !isIcloudImage
+            if let image = image {
                 cell.imageView.image = image
             }
         }
@@ -465,7 +492,7 @@ extension ImagePickerSheetController: UICollectionViewDelegate {
             return
         }
         
-        guard let cell = collectionView.cellForItem(at: indexPath) as? PreviewCollectionViewCell, cell.imageView.image != nil  else {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? PreviewCollectionViewCell, let image = cell.imageView.image else {
            return
         }
         
@@ -475,6 +502,7 @@ extension ImagePickerSheetController: UICollectionViewDelegate {
         // Just to make sure the image is only selected once
         selectedAssetIndices = selectedAssetIndices.filter { $0 != indexPath.section }
         selectedAssetIndices.append(indexPath.section)
+        selectedImages.append(image)
         
 //        if !enlargedPreviews {
 //            enlargePreviewsByCenteringToIndexPath(indexPath) {
@@ -506,6 +534,7 @@ extension ImagePickerSheetController: UICollectionViewDelegate {
             delegate?.controller?(self, willDeselectAsset: deselectedAsset)
             
             selectedAssetIndices.remove(at: index)
+            selectedImages.remove(at: index)
             sheetController.reloadActionItems()
             
             delegate?.controller?(self, didDeselectAsset: deselectedAsset)

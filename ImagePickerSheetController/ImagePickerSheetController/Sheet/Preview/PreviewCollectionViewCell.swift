@@ -43,7 +43,7 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         return view
     }()
     
-    var localIdetifier: String?
+    var localIdetifier: String = ""
     
     fileprivate class var videoImage: UIImage? {
         let bundle = Bundle(for: ImagePickerSheetController.self)
@@ -106,6 +106,7 @@ class PreviewCollectionViewCell: UICollectionViewCell {
         videoIndicatorView.isHidden = true
         iCloudIndicatorView.isHidden = true
         hightLightView.isHidden = true
+        localIdetifier = ""
         
         isUserInteractionEnabled = false
     }

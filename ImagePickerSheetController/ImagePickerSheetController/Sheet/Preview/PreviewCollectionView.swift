@@ -47,7 +47,7 @@ class PreviewCollectionView: UICollectionView {
                 if !bouncing {
                     let possibleIndexPath = indexPathForItem(at: gestureRecognizer.location(in: self))
                     if let indexPath = possibleIndexPath {
-                        selectItem(at: indexPath, animated: false, scrollPosition: UICollectionViewScrollPosition())
+                        selectItem(at: indexPath, animated: false, scrollPosition: UICollectionView.ScrollPosition())
                         delegate?.collectionView?(self, didSelectItemAt: indexPath)
                     }
                 }

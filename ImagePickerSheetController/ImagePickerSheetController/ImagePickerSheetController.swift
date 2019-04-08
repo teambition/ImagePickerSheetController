@@ -529,7 +529,7 @@ extension ImagePickerSheetController: UICollectionViewDelegate {
     }
     
     public func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-        if let index = selectedAssetIndices.index(of: indexPath.section) {
+        if let index = selectedAssetIndices.firstIndex(of: indexPath.section) {
             let deselectedAsset = selectedAssets[index]
             delegate?.controller?(self, willDeselectAsset: deselectedAsset)
             

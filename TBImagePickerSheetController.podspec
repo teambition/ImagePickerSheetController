@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   #  summary should be tweet-length, and the description more in depth.
   #
 
-  s.name         = "ImagePickerSheetController"
+  s.name         = "TBImagePickerSheetController"
   s.version      = "2.0.0"
   s.summary      = "ImagePickerSheetController is like the custom photo action sheet found in the iOS 8 and 9 version of iMessage"
 

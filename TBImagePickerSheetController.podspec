@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "TBImagePickerSheetController"
-  s.version      = "2.0.0"
+  s.version      = "2.0.1"
   s.summary      = "ImagePickerSheetController is like the custom photo action sheet found in the iOS 8 and 9 version of iMessage"
 
   s.description  = <<-DESC
